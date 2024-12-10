@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js" integrity="sha256-ZztCtsADLKbUFK/X6nOYnJr0eelmV2X3dhLDB/JK6fM=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.8/axios.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schedule App</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Schedule Viewer</h1>
+      <form id="scheduleForm">
+        <label for="studentNumber">Enter Student Number:</label>
+        <input
+          type="text"
+          id="studentNumber"
+          name="studentNumber"
+          placeholder="Enter number"
+          required
+        />
+        <div class="dayButtons">
+          <button type="button" value="timeGridDay" id="dayViewButton">Day</button>
+          <button type="button" value="dayGridWeek" id="weekViewButton">Week</button>
+          <button type="button" value="dayGridMonth" id="monthViewButton">Month</button>
+        </div>
+        <button type="submit">Get Schedule</button>
+      </form>
+
+      <div id="calendar"></div>
+      <div id="result" class="result"></div>
+    </div>
+    <script src="js/main.js"></script>
+  </body>
+</html>

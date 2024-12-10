@@ -1,0 +1,19 @@
+{
+    "name": "d/plan-backend",
+    "autoload": {
+        "psr-4": {
+            "D\\PlanBackend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Dragodui",
+            "email": "alghazaliaks123@gmail.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "^4.0",
+        "slim/psr7": "^1.7",
+        "guzzlehttp/guzzle": "^7.9"
+    }
+}
