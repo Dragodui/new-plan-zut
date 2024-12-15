@@ -72,5 +72,87 @@ body {
 .dayButtons {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin: 20px 0;
+}
+
+label {
+    margin-top: 20px;
+}
+
+.results {
+    position: relative;
+    margin-top: -15px; 
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    max-height: 150px; 
+    overflow-y: auto; 
+    padding: 8px;
+    font-size: 14px;
+}
+
+#classroom-results .classroom-list {
+    list-style: none; 
+    padding: 0;
+    margin: 0;
+}
+
+#classroom-results .classroom-list li {
+    padding: 4px 8px;
+    border-bottom: 1px solid #eee; 
+    cursor: pointer;
+}
+
+#classroom-results .classroom-list li:last-child {
+    border-bottom: none; 
+}
+
+#classroom-results .classroom-list li:hover {
+    background-color: #e6f7ff; 
+}
+
+#subject-results .subject-list {
+    list-style: none; 
+    padding: 0;
+    margin: 0;
+}
+
+#subject-results .subject-list li {
+    padding: 4px 8px;
+    border-bottom: 1px solid #eee; 
+    cursor: pointer;
+}
+
+#subject-results .subject-list li:last-child {
+    border-bottom: none; 
+}
+
+#subject-results .subject-list li:hover {
+    background-color: #e6f7ff; 
+}
+
+
+
+#teacher-results .teacher-list {
+    list-style: none; 
+    padding: 0;
+    margin: 0;
+}
+
+#teacher-results .teacher-list li {
+    padding: 4px 8px;
+    border-bottom: 1px solid #eee; 
+    cursor: pointer;
+}
+
+#teacher-results .teacher-list li:last-child {
+    border-bottom: none; 
+}
+
+#teacher-results .teacher-list li:hover {
+    background-color: #e6f7ff; 
+}
+
+#legend {
+    margin-top: 30px;
 }
