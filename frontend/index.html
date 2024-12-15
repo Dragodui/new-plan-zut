@@ -23,12 +23,14 @@
           name="studentNumber"
           placeholder="Enter number"
         />
+
         <label for="classroom">Enter classroom:</label>
         <input
           type="text"
           id="classroom"
           name="classroom"
           placeholder="Enter classroom"
+          autocomplete="off"
         />
         <div id="classroom-results" class="results"></div>
 
@@ -38,6 +40,7 @@
           id="subject"
           name="subject"
           placeholder="Enter subject"
+          autocomplete="off"
         />
         <div id="subject-results" class="results"></div>
 
@@ -47,6 +50,7 @@
           id="teacher"
           name="teacher"
           placeholder="Enter teacher"
+          autocomplete="off"
         />
         <div id="teacher-results" class="results"></div>
 
@@ -63,10 +67,19 @@
         </div>
         <button type="submit">Get Schedule</button>
       </form>
-
+      <div id="event-info">
+        <p style="font-weight: 700"><span style="font-weight: 700" id="event-title"></span></p>
+        <p><strong>Classroom:</strong> <span id="event-room"></span></p>
+        <p><strong>Time:</strong> <span id="event-time"></span></p>
+        <p><strong>Teacher:</strong> <span id="event-teacher"></span></p>
+        <p><strong>Description:</strong> <span id="event-description"></span></p>
+      </div>
       <div id="calendar"></div>
       <div id="legend"></div>
       <div id="result" class="result"></div>
+
+      <!-- Новый блок для отображения информации о событии -->
+      
     </div>
     <script src="js/Schedule.js"></script>
     <script src="js/main.js"></script>

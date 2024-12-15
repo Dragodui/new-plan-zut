@@ -259,12 +259,41 @@ class Schedule {
     this.number = null;
     try {
       const calendarElement = document.getElementById("calendar");
+      const eventInfoContainer = document.getElementById("event-info");
       this.calendar = new FullCalendar.Calendar(calendarElement, {
         initialView: this.grid,
         events: this.events,
         eventClick: function (info) {
-          alert(info.event.title + ": " + info.event.extendedProps.description);
-        },
+            eventInfoContainer.innerHTML = "";
+            const title = document.createElement("p");
+            title.style.fontWeight = "bold";
+            title.innerHTML = `${info.event.title}`;
+            eventInfoContainer.appendChild(title);
+    
+            const room = document.createElement("p");
+            room.innerHTML = `<strong>Classroom:</strong> ${
+              info.event.extendedProps.room || "No info"
+            }`;
+            eventInfoContainer.appendChild(room);
+    
+            const time = document.createElement("p");
+            time.innerHTML = `<strong>Time:</strong> ${info.event.start.toLocaleTimeString()} - ${info.event.end.toLocaleTimeString()}`;
+            eventInfoContainer.appendChild(time);
+    
+            const teacher = document.createElement("p");
+            teacher.innerHTML = `<strong>Teacher:</strong> ${
+              info.event.extendedProps.workerTitle || "No info"
+            }`;
+            eventInfoContainer.appendChild(teacher);
+    
+            const description = document.createElement("p");
+            description.innerHTML = `<strong>Description:</strong> ${
+              info.event.extendedProps.description || "No info"
+            }`;
+            eventInfoContainer.appendChild(description);
+            eventInfoContainer.style.display = "block";
+            eventInfoContainer.scrollIntoView({ behavior: "smooth" });
+          },
       });
 
       await this.calendar.render();
