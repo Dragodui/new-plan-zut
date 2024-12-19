@@ -15,19 +15,19 @@ class Schedule {
     this.teacher = null;
     this.number = null;
 
-    this.parseUrlParams();
+    // this.parseUrlParams();
     this.setupEventListeners();
 
     if (this.hasValidParams()) {
       this.getSchedule();
     }
 
-    window.addEventListener("popstate", (event) => {
-      this.parseUrlParams();
-      if (this.hasValidParams()) {
-        this.getSchedule();
-      }
-    });
+    // window.addEventListener("popstate", (event) => {
+    //   this.parseUrlParams();
+    //   if (this.hasValidParams()) {
+    //     this.getSchedule();
+    //   }
+    // });
   }
 
   setupEventListeners() {
@@ -57,7 +57,6 @@ class Schedule {
 
   parseUrlParams() {
     const params = new URLSearchParams(window.location.search);
-    console.log(params)
     this.number = params.get("number") || null;
     this.classroom = params.get("room") || null;
     this.subject = params.get("subject") || null;

@@ -5,7 +5,7 @@ body {
   margin: 0;
   padding: 0;
 }
-body .container {
+.container {
   max-width: 600px;
   margin: 50px auto;
   padding: 20px;
@@ -13,27 +13,27 @@ body .container {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
-body .container h1 {
+.container h1 {
   text-align: center;
   margin-bottom: 20px;
   font-size: 24px;
 }
-body .container form {
+.container form {
   display: flex;
   flex-direction: column;
 }
-body .container form label {
+.container form label {
   margin-bottom: 5px;
   font-size: 16px;
 }
-body .container form input {
+.container form input {
   padding: 10px;
   font-size: 14px;
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-body .container form button {
+.container form button {
   padding: 10px;
   font-size: 16px;
   color: #fff;
@@ -43,10 +43,10 @@ body .container form button {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-body .container form button:hover {
+.container form button:hover {
   background-color: #0056b3;
 }
-body .container .result {
+.container .result {
   margin-top: 20px;
   padding: 10px;
   border: 1px solid #ccc;
