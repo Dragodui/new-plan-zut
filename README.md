@@ -8,4 +8,5 @@
 [![My Skills](https://skillicons.dev/icons?i=php&theme=dark&perline=15)](https://skillicons.dev)
 
 # Demo
-![image](https://github.com/user-attachments/assets/660eb9f9-7f3b-4377-85b4-9a07443e6d01)
+![изображение](https://github.com/user-attachments/assets/971cf760-469b-43f6-9bf2-6dd64ca15222)
+
