@@ -60,3 +60,7 @@ vendor/
 .env
 
 database.sqlite
+
+dist/
+
+*.txt

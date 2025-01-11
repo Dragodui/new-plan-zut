@@ -1,20 +1,5 @@
-interface Event {
-  title: string;
-  start: string;
-  end: string;
-  description: string;
-  workerTitle: string;
-  worker: string;
-  room: string;
-  groupName: string;
-  tokName: string;
-  lessonForm: string;
-  lessonFormShort: string;
-  lesson_status: string;
-  color: string;
-}
 class Schedule {
-  api: any;
+  api: typeof axios.AxiosInstance;
   grid: string;
   events: Event[];
   calendar: typeof FullCalendar.Calendar | null;
@@ -104,7 +89,7 @@ class Schedule {
 
       const ul = document.createElement("ul");
       ul.classList.add("teacher-list");
-
+      console.log(data);
       data
         .filter((item: any) => item && typeof item === "object" && item.item)
         .forEach((subject: any) => {
