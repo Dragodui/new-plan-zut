@@ -5,6 +5,11 @@
             "D\\PlanBackend\\": "src/"
         }
     },
+    "scripts": {
+        "start": "php -S localhost:8000 -t public",
+        "build-ts": "node_modules/.bin/tsc",
+        "dev-ts": "node_modules/.bin/tsc --watch"
+      },
     "authors": [
         {
             "name": "Dragodui",
