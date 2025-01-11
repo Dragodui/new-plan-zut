@@ -64,3 +64,5 @@ database.sqlite
 dist/
 
 *.txt
+ao-proj.lnk
+.vscode/

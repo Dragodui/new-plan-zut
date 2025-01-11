@@ -2,7 +2,7 @@
 
 # technologies
 ### Front-end
-[![My Skills](https://skillicons.dev/icons?i=html,css,javascript&theme=dark&perline=15)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=html,css,typescript&theme=dark&perline=15)](https://skillicons.dev)
 
 ### Back-end
 [![My Skills](https://skillicons.dev/icons?i=php,sqlite&theme=dark&perline=15)](https://skillicons.dev)
