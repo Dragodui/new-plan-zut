@@ -261,7 +261,7 @@ class Schedule {
             try {
                 const calendarElement = document.getElementById("calendar");
                 const eventInfoContainer = document.getElementById("event-info");
-                this.calendar = new Calendar.Calendar(calendarElement, {
+                this.calendar = new FullCalendar.Calendar(calendarElement, {
                     initialView: this.grid,
                     events: this.events,
                     eventClick: function (info) {

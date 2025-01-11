@@ -1,2 +1,2 @@
 declare const axios: typeof import("axios");
-declare const Calendar: typeof import('@fullcalendar/core');
+declare const FullCalendar: typeof import('@fullcalendar/core');

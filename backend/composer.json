@@ -2,8 +2,8 @@
     "name": "d/plan-backend",
     "autoload": {
         "psr-4": {
-            "D\\PlanBackend\\": "src/"
-        }
+            "App\\": "src/"
+          }
     },
     "scripts": {
         "start": "php -S localhost:8000 -t public",

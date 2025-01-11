@@ -17,7 +17,7 @@ class Schedule {
   api: any;
   grid: string;
   events: Event[];
-  calendar: typeof Calendar | null;
+  calendar: typeof FullCalendar.Calendar | null;
   classroom: string | null;
   classrooms: string[];
   kind: string | null;
@@ -295,7 +295,7 @@ class Schedule {
     try {
       const calendarElement = document.getElementById("calendar");
       const eventInfoContainer = document.getElementById("event-info");
-      this.calendar = new Calendar.Calendar(calendarElement, {
+      this.calendar = new FullCalendar.Calendar(calendarElement, {
         initialView: this.grid,
         events: this.events,
         eventClick: function (info: any) {
