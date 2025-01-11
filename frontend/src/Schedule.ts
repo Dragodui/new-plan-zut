@@ -1,4 +1,30 @@
+interface Event {
+  title: string;
+  start: string;
+  end: string;
+  description: string;
+  workerTitle: string;
+  worker: string;
+  room: string;
+  groupName: string;
+  tokName: string;
+  lessonForm: string;
+  lessonFormShort: string;
+  lesson_status: string;
+  color: string;
+}
 class Schedule {
+  api: any;
+  grid: string;
+  events: Event[];
+  calendar: typeof Calendar | null;
+  classroom: string | null;
+  classrooms: string[];
+  kind: string | null;
+  subject: string | null;
+  teacher: string | null;
+  number: string | null;
+
   constructor() {
     this.api = axios.create({
       baseURL: "http://localhost:8000",
@@ -31,28 +57,16 @@ class Schedule {
   }
 
   setupEventListeners() {
-    document.getElementById("scheduleForm").addEventListener("submit", (e) => {
+    document.getElementById("scheduleForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
       this.getSchedule();
     });
-    document
-      .getElementById("dayViewButton")
-      .addEventListener("click", () => this.changeGrid("timeGridDay"));
-    document
-      .getElementById("weekViewButton")
-      .addEventListener("click", () => this.changeGrid("dayGridWeek"));
-    document
-      .getElementById("monthViewButton")
-      .addEventListener("click", () => this.changeGrid("dayGridMonth"));
-    document
-      .getElementById("classroom")
-      .addEventListener("change", this.getClassroom.bind(this));
-    document
-      .getElementById("subject")
-      .addEventListener("change", this.getSubject.bind(this));
-    document
-      .getElementById("teacher")
-      .addEventListener("change", this.getTeacher.bind(this));
+    document.getElementById("dayViewButton")?.addEventListener("click", () => this.changeGrid("timeGridDay"));
+    document.getElementById("weekViewButton")?.addEventListener("click", () => this.changeGrid("dayGridWeek"));
+    document.getElementById("monthViewButton")?.addEventListener("click", () => this.changeGrid("dayGridMonth"));
+    document.getElementById("classroom")?.addEventListener("change", this.getClassroom.bind(this));
+    document.getElementById("subject")?.addEventListener("change", this.getSubject.bind(this));
+    document.getElementById("teacher")?.addEventListener("change", this.getTeacher.bind(this));
   }
 
   parseUrlParams() {
@@ -63,17 +77,17 @@ class Schedule {
     this.teacher = params.get("teacher") || null;
 
     if (this.number)
-      document.getElementById("studentNumber").value = this.number;
+      (document.getElementById("studentNumber") as HTMLInputElement).value = this.number;
     if (this.classroom)
-      document.getElementById("classroom").value = this.classroom;
-    if (this.subject) document.getElementById("subject").value = this.subject;
-    if (this.teacher) document.getElementById("teacher").value = this.teacher;
+      (document.getElementById("classroom")as HTMLInputElement).value = this.classroom;
+    if (this.subject) (document.getElementById("subject") as HTMLInputElement).value = this.subject;
+    if (this.teacher) (document.getElementById("teacher") as HTMLInputElement).value = this.teacher;
   }
 
   async getTeacher() {
-    const teacherQuery = document.getElementById("teacher").value;
+    const teacherQuery = (document.getElementById("teacher") as HTMLInputElement).value;
     const resultsContainer = document.getElementById("teacher-results");
-    resultsContainer.innerHTML = "";
+    if (resultsContainer) (resultsContainer as HTMLDivElement).innerHTML = "";
 
     if (!teacherQuery) {
       return;
@@ -83,8 +97,8 @@ class Schedule {
       const response = await this.api.get(`/teacher?teacher=${teacherQuery}`);
       const data = response.data;
 
-      if (!Array.isArray(data) || data.length === 0) {
-        resultsContainer.innerHTML = "<p>No teacher found.</p>";
+      if ((!Array.isArray(data) || data.length === 0) && resultsContainer) {
+        (resultsContainer as HTMLDivElement).innerHTML = "<p>No teacher found.</p>";
         return;
       }
 
@@ -92,32 +106,31 @@ class Schedule {
       ul.classList.add("teacher-list");
 
       data
-        .filter((item) => item && typeof item === "object" && item.item)
-        .forEach((subject) => {
+        .filter((item: any) => item && typeof item === "object" && item.item)
+        .forEach((subject: any) => {
           const li = document.createElement("li");
           li.textContent = subject.item;
           li.addEventListener("click", () => this.selectTeacher(subject.item));
           ul.appendChild(li);
         });
 
-      resultsContainer.appendChild(ul);
+      if (resultsContainer) (resultsContainer as HTMLDivElement).appendChild(ul);
     } catch (error) {
-      resultsContainer.innerHTML =
-        "<p style='color: red;'>Error loading teachers.</p>";
+      if (resultsContainer) (resultsContainer as HTMLDivElement).innerHTML = "<p style='color: red;'>Error loading teachers.</p>";
     }
   }
 
-  selectTeacher(teacherName) {
+  selectTeacher(teacherName: string) {
     this.teacher = teacherName;
-    document.getElementById("teacher").value = teacherName;
-    document.getElementById("teacher-results").innerHTML = "";
+    (document.getElementById("teacher") as HTMLInputElement).value = teacherName;
+    (document.getElementById("teacher-results") as HTMLDivElement).innerHTML = "";
     this.updateQueryParams();
   }
 
   async getSubject() {
-    const subjectQuery = document.getElementById("subject").value;
+    const subjectQuery = (document.getElementById("subject")as HTMLInputElement).value;
     const resultsContainer = document.getElementById("subject-results");
-    resultsContainer.innerHTML = "";
+    (resultsContainer as HTMLDivElement).innerHTML = "";
 
     if (!subjectQuery) {
       return;
@@ -128,7 +141,7 @@ class Schedule {
       const data = response.data;
 
       if (!Array.isArray(data) || data.length === 0) {
-        resultsContainer.innerHTML = "<p>No subjects found.</p>";
+        (resultsContainer as HTMLDivElement).innerHTML = "<p>No subjects found.</p>";
         return;
       }
 
@@ -144,24 +157,24 @@ class Schedule {
           ul.appendChild(li);
         });
 
-      resultsContainer.appendChild(ul);
+      (resultsContainer as HTMLDivElement).appendChild(ul);
     } catch (error) {
-      resultsContainer.innerHTML =
+      (resultsContainer as HTMLDivElement).innerHTML =
         "<p style='color: red;'>Error loading subjects.</p>";
     }
   }
 
-  selectSubject(subjectName) {
+  selectSubject(subjectName: string) {
     this.subject = subjectName;
-    document.getElementById("subject").value = subjectName;
-    document.getElementById("subject-results").innerHTML = "";
+    (document.getElementById("subject") as HTMLInputElement).value = subjectName;
+    (document.getElementById("subject-results") as HTMLDivElement).innerHTML = "";
     this.updateQueryParams();
   }
 
   async getClassroom() {
-    const classroomQuery = document.getElementById("classroom").value;
+    const classroomQuery = (document.getElementById("classroom") as HTMLInputElement).value;
     const resultsContainer = document.getElementById("classroom-results");
-    resultsContainer.innerHTML = "";
+    (resultsContainer as HTMLDivElement).innerHTML = "";
 
     if (!classroomQuery) {
       return;
@@ -172,7 +185,7 @@ class Schedule {
       const data = response.data;
 
       if (!Array.isArray(data) || data.length === 0) {
-        resultsContainer.innerHTML = "<p>No classrooms found.</p>";
+        (resultsContainer as HTMLDivElement).innerHTML = "<p>No classrooms found.</p>";
         return;
       }
 
@@ -190,21 +203,21 @@ class Schedule {
           ul.appendChild(li);
         });
 
-      resultsContainer.appendChild(ul);
+      (resultsContainer as HTMLDivElement).appendChild(ul);
     } catch (error) {
-      resultsContainer.innerHTML =
+      (resultsContainer as HTMLDivElement).innerHTML =
         "<p style='color: red;'>Error loading classrooms.</p>";
     }
   }
 
-  selectClassroom(classroomName) {
+  selectClassroom(classroomName: string) {
     this.classroom = classroomName;
-    document.getElementById("classroom").value = classroomName;
-    document.getElementById("classroom-results").innerHTML = "";
+    (document.getElementById("classroom") as HTMLInputElement).value = classroomName;
+    (document.getElementById("classroom-results") as HTMLDivElement).innerHTML = "";
     this.updateQueryParams();
   }
 
-  async changeGrid(view) {
+  async changeGrid(view: string) {
     this.grid = view;
     if (this.calendar) {
       await this.calendar.changeView(view);
@@ -224,10 +237,10 @@ class Schedule {
 
   async getSchedule() {
     const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = "Loading...";
+    (resultDiv as HTMLDivElement).innerHTML = "Loading...";
 
     try {
-      this.number = document.getElementById("studentNumber").value;
+      this.number = (document.getElementById("studentNumber") as HTMLInputElement).value;
       this.updateQueryParams();
 
       const queryParams = new URLSearchParams(window.location.search);
@@ -241,7 +254,7 @@ class Schedule {
 
       const data = response.data;
 
-      this.events = data.map((item) => ({
+      this.events = data.map((item: any) => ({
         title: item.subject,
         start: item.start,
         end: item.end,
@@ -264,7 +277,7 @@ class Schedule {
       }
       this.createLegend();
     } catch (error) {
-      resultDiv.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+      (resultDiv as HTMLDivElement).innerHTML = `<span style="color: red;">Error: ${error}</span>`;
     }
   }
 
@@ -282,39 +295,39 @@ class Schedule {
     try {
       const calendarElement = document.getElementById("calendar");
       const eventInfoContainer = document.getElementById("event-info");
-      this.calendar = new FullCalendar.Calendar(calendarElement, {
+      this.calendar = new Calendar.Calendar(calendarElement, {
         initialView: this.grid,
         events: this.events,
-        eventClick: function (info) {
-          eventInfoContainer.innerHTML = "";
+        eventClick: function (info: any) {
+          (eventInfoContainer as HTMLDivElement).innerHTML = "";
           const title = document.createElement("p");
           title.style.fontWeight = "bold";
           title.innerHTML = `${info.event.title}`;
-          eventInfoContainer.appendChild(title);
+          eventInfoContainer?.appendChild(title);
 
           const room = document.createElement("p");
           room.innerHTML = `<strong>Classroom:</strong> ${
             info.event.extendedProps.room || "No info"
           }`;
-          eventInfoContainer.appendChild(room);
+          eventInfoContainer?.appendChild(room);
 
           const time = document.createElement("p");
           time.innerHTML = `<strong>Time:</strong> ${info.event.start.toLocaleTimeString()} - ${info.event.end.toLocaleTimeString()}`;
-          eventInfoContainer.appendChild(time);
+          eventInfoContainer?.appendChild(time);
 
           const teacher = document.createElement("p");
           teacher.innerHTML = `<strong>Teacher:</strong> ${
             info.event.extendedProps.workerTitle || "No info"
           }`;
-          eventInfoContainer.appendChild(teacher);
+          eventInfoContainer?.appendChild(teacher);
 
           const description = document.createElement("p");
           description.innerHTML = `<strong>Description:</strong> ${
             info.event.extendedProps.description || "No info"
           }`;
-          eventInfoContainer.appendChild(description);
-          eventInfoContainer.style.display = "block";
-          eventInfoContainer.scrollIntoView({ behavior: "smooth" });
+          eventInfoContainer?.appendChild(description);
+          if (eventInfoContainer) eventInfoContainer.style.display = "block";
+          eventInfoContainer?.scrollIntoView({ behavior: "smooth" });
         },
       });
 
@@ -326,7 +339,7 @@ class Schedule {
 
   createLegend() {
     const legendContainer = document.getElementById("legend");
-    legendContainer.innerHTML = "";
+    (legendContainer as HTMLDivElement).innerHTML = "";
 
     const forms = new Map();
 
@@ -353,7 +366,7 @@ class Schedule {
       label.textContent = form;
       legendItem.appendChild(label);
 
-      legendContainer.appendChild(legendItem);
+      legendContainer?.appendChild(legendItem);
     });
   }
 
