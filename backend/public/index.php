@@ -9,4 +9,5 @@ $router = new Router();
 $router->get('/subject', [\App\Controllers\SubjectController::class, 'getSubject']);
 $router->get('/teacher', [\App\Controllers\TeacherController::class, 'getTeacher']);
 $router->get('/schedule', [\App\Controllers\ScheduleController::class, 'getSchedule']);
+$router->get('/classroom', [\App\Controllers\ClassroomController::class, 'getClassroom']);
 $router->run();
