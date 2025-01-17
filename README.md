@@ -57,7 +57,7 @@ composer install
 
 ### 3. Set Up the Database
 
-You can setup your `.sqlite` database using [this script]("https://github.com/Dragodui/repo-will-be-soon") *(will be soon)*
+You can setup your `.sqlite` database using [this script](https://github.com/Dragodui/get-schedule-data-zut)
 
 ### 4. Install TypeScript Globally
 
