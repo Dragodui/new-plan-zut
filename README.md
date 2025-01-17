@@ -2,7 +2,7 @@
 
 # New Plan Zut
 
-> Schedule for ZUT students built with PHP, HTML, CSS, and TypeScript."
+> Schedule for ZUT students built with PHP, HTML, CSS, and TypeScript.
 
 ## Table of Contents
 
@@ -18,8 +18,9 @@
   - [Running the Application](#running-the-application)
     - [1. Start the Web Server](#1-start-the-web-server)
     - [2. Access the Application](#2-access-the-application)
-    - [3. Compile TypeScript into Javascript](#3-compile-typescript-into-javascript)
+    - [3. Compile TypeScript into JavaScript](#3-compile-typescript-into-javascript)
     - [4. Run front-end using `live server` or opening `index.html`](#4-run-front-end-using-live-server-or-opening-indexhtml)
+  - [Project Structure](#project-structure)
   - [Demo](#demo)
 
 ## Technologies
@@ -88,6 +89,38 @@ tsc
 ```
 
 ### 4. Run front-end using `live server` or opening `index.html`
+
+
+## Project Structure
+
+```
+new-plan-zut/
+├── backend/                     # Backend-related logic and PHP files
+│   ├── public/                  # Public-facing entry point
+│   │   └── index.php            # Main entry point for the backend
+│   ├── src/                     # Core backend source code
+│   │   ├── Controllers/         # Controller classes handling various logic
+│   │   │   ├── ClassroomController.php
+│   │   │   ├── ScheduleController.php
+│   │   │   ├── SubjectController.php
+│   │   │   └── TeacherController.php
+│   │   ├── Controller.php       # Base controller class
+│   │   ├── Router.php           # Routing logic for backend requests
+│   ├── composer.json            # PHP dependencies
+│   └── composer.lock            # Locked PHP dependencies
+├── frontend/                    # Frontend files including HTML, CSS, and TypeScript
+│   ├── css/                     # Styling for the frontend
+│   │   └── styles.css           # Main CSS file
+│   ├── src/                     # Core frontend source code
+│   │   ├── types/               # TypeScript types and interfaces
+│   │   ├── main.ts              # Main TypeScript logic
+│   │   ├── Schedule.ts          # TypeScript logic for scheduling
+│   │   └── index.html           # Main HTML file for the frontend
+│   └── tsconfig.json            # TypeScript configuration file
+├── .gitignore                   # Files and folders to ignore in Git
+└── README.md                    # Project documentation
+```
+
 
 ## Demo
 ![изображение](https://github.com/user-attachments/assets/971cf760-469b-43f6-9bf2-6dd64ca15222)
