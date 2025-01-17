@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Controller;
+use App\Database as AppDatabase;
 
 class TeacherController extends Controller
 {
@@ -16,11 +17,13 @@ class TeacherController extends Controller
         $apiUrl = "https://plan.zut.edu.pl/schedule.php?kind=teacher&query=" . urlencode($teacher);
 
         try {
-            $data = $this->httpGet($apiUrl);
-            if ($data === false) {
-                throw new \Exception('Failed to fetch data');
-            }
-            $this->jsonResponse(json_decode($data, true));
+            $db  = AppDatabase::getConnection();
+            $query = $db->prepare("SELECT item FROM teachers WHERE item LIKE :teacher");
+            $query->bindValue(':teacher', '%' . $teacher . '%', \PDO::PARAM_STR);
+
+            $query->execute();
+            $result = $query->fetchAll(\PDO::FETCH_ASSOC);
+            $this->jsonResponse($result);
         } catch (\Exception $e) {
             $this->jsonResponse(['error' => 'Unable to fetch teacher schedule', 'details' => $e->getMessage()], 500);
         }
