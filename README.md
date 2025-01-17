@@ -80,7 +80,7 @@ php composer.phar start
 
 Open your browser and navigate to [http://localhost:8000](http://localhost:8000).
 
-### 3. Compile TypeScript into Javascript 
+### 3. Compile TypeScript into JavaScript 
 
 ```bash
 cd frontend
