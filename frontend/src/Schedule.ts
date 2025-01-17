@@ -9,12 +9,15 @@ class Schedule {
   subject: string | null;
   teacher: string | null;
   number: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  shouldFetchSchedule: boolean;
 
   constructor() {
     this.api = axios.create({
       baseURL: "http://localhost:8000",
     });
-
+    this.shouldFetchSchedule = true;
     this.grid = "dayGridMonth";
     this.events = [];
     this.getSchedule = this.getSchedule.bind(this);
@@ -25,11 +28,13 @@ class Schedule {
     this.subject = null;
     this.teacher = null;
     this.number = null;
+    this.startDate = null;
+    this.endDate = null;
 
     // this.parseUrlParams();
     this.setupEventListeners();
 
-    if (this.hasValidParams()) {
+    if (this.hasValidParams() !== null) {
       this.getSchedule();
     }
 
@@ -44,6 +49,7 @@ class Schedule {
   setupEventListeners() {
     document.getElementById("scheduleForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
+      // e.stopPropagation();
       this.getSchedule();
     });
     document.getElementById("dayViewButton")?.addEventListener("click", () => this.changeGrid("timeGridDay"));
@@ -89,7 +95,6 @@ class Schedule {
 
       const ul = document.createElement("ul");
       ul.classList.add("teacher-list");
-      console.log(data);
       data
         .filter((item: any) => item && typeof item === "object" && item.item)
         .forEach((subject: any) => {
@@ -203,10 +208,13 @@ class Schedule {
   }
 
   async changeGrid(view: string) {
+    this.shouldFetchSchedule = false;
     this.grid = view;
     if (this.calendar) {
       await this.calendar.changeView(view);
+      await this.updateCalendar();
     }
+    this.shouldFetchSchedule = true;
   }
 
   updateQueryParams() {
@@ -215,13 +223,19 @@ class Schedule {
     if (this.classroom) queryParams.set("room", this.classroom);
     if (this.subject) queryParams.set("subject", this.subject);
     if (this.teacher) queryParams.set("teacher", this.teacher);
+    if (this.startDate) queryParams.set("start", this.startDate.toISOString());
+    if (this.endDate) queryParams.set("end", this.endDate.toISOString());
 
     const newUrl = `${window.location.pathname}?${queryParams.toString()}`;
     history.pushState({}, "", newUrl);
   }
 
   async getSchedule() {
+    const view = this.calendar.view;
+    this.startDate = view.currentStart;
+    this.endDate = view.currentEnd;
     const resultDiv = document.getElementById("result");
+    (resultDiv as HTMLDivElement).style.display = "inline-block";
     (resultDiv as HTMLDivElement).innerHTML = "Loading...";
 
     try {
@@ -240,7 +254,7 @@ class Schedule {
       const data = response.data;
 
       this.events = data.map((item: any) => ({
-        title: item.subject,
+        title: item.title,
         start: item.start,
         end: item.end,
         description: item.description || "No description",
@@ -251,16 +265,17 @@ class Schedule {
         tokName: item.tok_name,
         lessonForm: item.lesson_form,
         lessonFormShort: item.lesson_form_short,
-        lesson_status: item.lesson_status,
+        lessonStatus: item.lesson_status,
         color: item.color,
       }));
 
       if (!this.calendar) {
         await this.initializeCalendar();
       } else {
-        this.updateCalendar();
+        await this.updateCalendar();
       }
-      this.createLegend();
+      await this.createLegend();
+      (resultDiv as HTMLDivElement).style.display = "none";
     } catch (error) {
       (resultDiv as HTMLDivElement).innerHTML = `<span style="color: red;">Error: ${error}</span>`;
     }
@@ -314,15 +329,38 @@ class Schedule {
           if (eventInfoContainer) eventInfoContainer.style.display = "block";
           eventInfoContainer?.scrollIntoView({ behavior: "smooth" });
         },
+        datesSet: (info: any) => {
+          const newStartDate = info.start;
+          const newEndDate = info.end;
+  
+          const isOutsideRange =
+            !this.startDate ||
+            !this.endDate ||
+            newStartDate < this.startDate ||
+            newEndDate > this.endDate;
+  
+          if (isOutsideRange) {
+            this.startDate = newStartDate;
+            this.endDate = newEndDate;
+            this.updateQueryParams();
+            if (this.shouldFetchSchedule && this.hasValidParams() !== null) {
+              this.getSchedule();
+            }
+          }
+        },
       });
 
       await this.calendar.render();
+      const view = this.calendar.view;
+      this.startDate = view.currentStart;
+      this.endDate = view.currentEnd;
+      this.updateQueryParams();
     } catch (error) {
       console.error(error);
     }
   }
 
-  createLegend() {
+  async createLegend() {
     const legendContainer = document.getElementById("legend");
     (legendContainer as HTMLDivElement).innerHTML = "";
 
@@ -355,7 +393,8 @@ class Schedule {
     });
   }
 
-  hasValidParams() {
-    return this.number || this.classroom || this.subject || this.teacher;
+  hasValidParams(): string | null {
+    const result =  this.number || this.classroom || this.subject || this.teacher;
+    return result;
   }
 }

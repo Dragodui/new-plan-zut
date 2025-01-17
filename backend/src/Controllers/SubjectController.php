@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Controller;
+use App\Database as AppDatabase;
 
 class SubjectController extends Controller
 {
@@ -13,14 +14,14 @@ class SubjectController extends Controller
             $this->jsonResponse(['error' => 'Subject is required'], 400);
         }
 
-        $apiUrl = "https://plan.zut.edu.pl/schedule.php?kind=subject&query=" . urlencode($subject);
-
         try {
-            $data = $this->httpGet($apiUrl);
-            if ($data === false) {
-                throw new \Exception('Failed to fetch data');
-            }
-            $this->jsonResponse(json_decode($data, true));
+            $db  = AppDatabase::getConnection();
+            $query = $db->prepare("SELECT item FROM subjects WHERE item LIKE :subject");
+            $query->bindValue(':subject', '%' . $subject . '%', \PDO::PARAM_STR); 
+
+            $query->execute();
+            $result = $query->fetchAll(\PDO::FETCH_ASSOC);
+            $this->jsonResponse($result);
         } catch (\Exception $e) {
             $this->jsonResponse(['error' => 'Unable to fetch subject schedule', 'details' => $e->getMessage()], 500);
         }
