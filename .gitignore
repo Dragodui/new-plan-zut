@@ -66,3 +66,4 @@ dist/
 *.txt
 ao-proj.lnk
 .vscode/
+.idea/

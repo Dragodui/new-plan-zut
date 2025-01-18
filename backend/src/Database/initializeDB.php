@@ -42,7 +42,7 @@ class InitializeDB
             $db->exec("
             CREATE TABLE IF NOT EXISTS classrooms (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                item TEXT NOT NULL
+                item TEXT NOT NULL,
                 building TEXT NOT NULL
             )
         ");

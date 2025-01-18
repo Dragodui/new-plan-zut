@@ -3,7 +3,6 @@ namespace App\Controllers;
 
 use App\Controller;
 use App\Database as AppDatabase;
-use \PDOException;
 
 class ScheduleController extends Controller
 {
