@@ -1,11 +1,115 @@
 <?php
 namespace App\Controllers;
 
+use function App\Utils\getSemesterDates;
 use App\Controller;
 use App\Database as AppDatabase;
 
+require_once __DIR__ . '/../Utils/GetCurrentSemester.php';
+
 class ScheduleController extends Controller
 {
+    private $db;
+
+    public function __construct() {
+        $this->db = AppDatabase::getConnection();
+        $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+    }
+    public function InsertDataToDB($number) {
+        try {
+            $semesterDates = getSemesterDates();
+
+        $_GET['start'] = $semesterDates->start;
+        $_GET['end'] = $semesterDates->end;
+        $apiUrl = "https://plan.zut.edu.pl/schedule_student.php?" . http_build_query($_GET);
+
+
+        $data = $this->httpGet($apiUrl);
+        
+        if ($data === false) {
+            throw new \Exception('Failed to fetch data');
+        }
+        
+        if ($data === null) {
+            throw new \Exception('Failed to decode JSON');
+        }
+        // // NOT WORTH IT
+        // Okay, maybe it is worth it
+
+        $jsonData = json_decode($data);
+        $jsonData = array_filter($jsonData, function ($item) {
+            return !is_array($item) && isset($item->title);
+        });
+
+
+        $jsonData = array_values($jsonData);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('JSON decode error: ' . json_last_error_msg());
+        }
+
+        $uniqueGroups = [];
+        
+        foreach ($jsonData as $item) {
+            if (!isset($item->group_name)) {
+                continue; 
+            }
+            $groupName = $item->group_name;
+            if (!in_array($groupName, $uniqueGroups)) {
+                $uniqueGroups[] = $groupName; 
+            }
+        }
+        $studentNumber = $number;
+
+        $groupQuery = $this->db->prepare("INSERT OR IGNORE INTO groups (item) VALUES (:group)");
+        $studentQuery = $this->db->prepare("INSERT OR IGNORE INTO students (item, groupNumber) VALUES (:number, :group)");
+        
+        foreach ($uniqueGroups as $group) {
+            try {
+                $groupQuery->bindValue(':group', $group, \PDO::PARAM_STR);
+                $groupQuery->execute();
+
+                $studentQuery->bindValue(':number', $studentNumber, \PDO::PARAM_STR);
+                $studentQuery->bindValue(':group', $group, \PDO::PARAM_STR);
+                $studentQuery->execute();
+            } catch (\PDOException $e) {
+                // error_log('Database error: ' . $e->getMessage()); 
+                $this->jsonResponse(['error' => 'Database operation failed', 'details' => $e->getMessage()], 500);
+                return;
+            }
+        }
+        return;
+        } catch (\Exception $e) {
+            $this->jsonResponse(['error' => 'Unable to fetch schedule', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getDataFromDB($groups, $startDate, $endDate) {
+        $schedule = [];
+    
+        foreach ($groups as $groupRow) {
+            $group = $groupRow['groupNumber'];
+
+            $scheduleQuery = $this->db->prepare("
+                SELECT * 
+                FROM schedule 
+                WHERE groupName = :group AND start >= :start AND end <= :end
+            ");
+            $scheduleQuery->bindValue(':group', $group, \PDO::PARAM_STR);
+            $scheduleQuery->bindValue(':start', $startDate, \PDO::PARAM_STR);
+            $scheduleQuery->bindValue(':end', $endDate, \PDO::PARAM_STR);
+            $scheduleQuery->execute();
+
+            $groupSchedule = $scheduleQuery->fetchAll(\PDO::FETCH_ASSOC);
+            
+            if (!empty($groupSchedule)) {
+                $schedule = array_merge($schedule, $groupSchedule); 
+            }
+        }
+        $this->jsonResponse($schedule);
+    }
+
     public function getSchedule()
     {
         if (empty($_GET)) {
@@ -23,62 +127,29 @@ class ScheduleController extends Controller
             $subject = implode(' ', array_slice($words, 0, 2));
         }
 
-        $apiUrl = "https://plan.zut.edu.pl/schedule_student.php?" . http_build_query($_GET);
-
         try {
-            $db = AppDatabase::getConnection();
+            if (!$this->db) {
+                throw new \Exception('Failed to connect to the database');
+            }
             if ($number) {
-                $studentQuery = $db->prepare("SELECT groupNumber FROM students WHERE item = :number");
+                $studentQuery = $this->db->prepare("SELECT groupNumber FROM students WHERE item = :number");
                 $studentQuery->bindValue(':number', $number , \PDO::PARAM_STR);
                 $studentQuery->execute();
-                $groupName = $studentQuery->fetch(\PDO::FETCH_ASSOC);
-                if ($groupName) {
-                    $group = $groupName['groupNumber'];
-                    $scheduleQuery = $db->prepare("SELECT * FROM schedule WHERE groupName = :group AND start >= :start AND end <= :end");
-                    $scheduleQuery->bindValue(':group', $group , \PDO::PARAM_STR);
-                    $scheduleQuery->bindValue(':start', $startDate, \PDO::PARAM_STR);
-                    $scheduleQuery->bindValue(':end', $endDate, \PDO::PARAM_STR);
-                    $scheduleQuery->execute();
+                $groups = $studentQuery->fetchAll(\PDO::FETCH_ASSOC);
 
-                    $schedule = $scheduleQuery->fetchAll(\PDO::FETCH_ASSOC);
-                    if (!empty($schedule)) {
-                        $this->jsonResponse($schedule);
-                        return;
-                    }
+                if (!empty($groups)) {
+                   $this->getDataFromDB($groups, $startDate, $endDate);
                 } else {
-                    $data = $this->httpGet($apiUrl);
-                    if ($data === false) {
-                        throw new \Exception('Failed to fetch data');
-                    }
-                    
-                    if ($data === null) {
-                        throw new \Exception('Failed to decode JSON');
-                    }
-                    // NOT WORTH IT
+                    $this->InsertDataToDB($number);
 
-                    // $jsonData = json_decode($data);
-                    // $dataLength = count($jsonData);
-                    // if ($dataLength < 2) {
-                    //    $secondItem = null;
-                    // } else {
-                    // $secondItem = $jsonData[1];   
-                    // }
-                    // if ($secondItem !== null) {
-                    //     $currentGroup = $secondItem->group_name;
-                    //     $groupQuery = $db->prepare("INSERT INTO groups (item) VALUES (:group)");
-                    //     $studentQuery = $db->prepare("INSERT INTO students (item, groupNumber) VALUES (:number, :group)");
-
-                    //     $groupQuery->bindValue(':group', $currentGroup, \PDO::PARAM_STR); 
-                    //     $studentQuery->bindValue(':number', $number, \PDO::PARAM_STR);   
-                    //     $studentQuery->bindValue(':group', $currentGroup, \PDO::PARAM_STR); 
-
-                        // $groupQuery->execute();
-                        // $studentQuery->execute();
-                    // }
-
-                    $this->jsonResponse(json_decode($data, true));
-                    return;
+                    $studentQuery = $this->db->prepare("SELECT groupNumber FROM students WHERE item = :number");
+                    $studentQuery->bindValue(':number', $number , \PDO::PARAM_STR);
+                    $studentQuery->execute();
+                    $groups = $studentQuery->fetchAll(\PDO::FETCH_ASSOC);
+    
+                    $this->getDataFromDB($groups, $startDate, $endDate);
                 }
+                return;
             } else {
                 $queryParts = [];
                 $params = [];
@@ -113,7 +184,7 @@ class ScheduleController extends Controller
                     $sql .= " WHERE " . implode(" AND ", $queryParts);
                 }
                 
-                $query = $db->prepare($sql);
+                $query = $this->db->prepare($sql);
                 
                 foreach ($params as $key => $value) {
                     $query->bindValue($key, $value, \PDO::PARAM_STR);

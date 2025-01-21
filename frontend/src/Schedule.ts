@@ -49,7 +49,6 @@ class Schedule {
   setupEventListeners() {
     document.getElementById("scheduleForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
-      // e.stopPropagation();
       this.getSchedule();
     });
     document.getElementById("dayViewButton")?.addEventListener("click", () => this.changeGrid("timeGridDay"));
@@ -248,7 +247,8 @@ class Schedule {
       );
 
       if (response.status !== 200) {
-        throw new Error("Failed to fetch schedule");
+        // throw new Error("Failed to fetch schedule");
+        console.error("Failed to fetch schedule");
       }
 
       const data = response.data;
@@ -258,16 +258,18 @@ class Schedule {
         start: item.start,
         end: item.end,
         description: item.description || "No description",
-        workerTitle: item.worker_title,
+        workerTitle: item.workerTitle,
         worker: item.worker,
         room: item.room,
-        groupName: item.group_name,
-        tokName: item.tok_name,
-        lessonForm: item.lesson_form,
-        lessonFormShort: item.lesson_form_short,
-        lessonStatus: item.lesson_status,
+        groupName: item.groupName,
+        tokName: item.tokName,
+        lessonForm: item.lessonForm,
+        lessonFormShort: item.lessonFormShort,
+        lessonStatus: item.lessonStatus,
         color: item.color,
       }));
+
+      console.log(this.events);
 
       if (!this.calendar) {
         await this.initializeCalendar();

@@ -13,11 +13,6 @@ spl_autoload_register(function ($class) {
     }
 });
 
-
-
-require_once __DIR__ . '/../src/Router.php';
-require_once __DIR__ . '/../src/Database/initializeDB.php';
-
 use App\Router;
 
 
