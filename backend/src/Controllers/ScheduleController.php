@@ -6,7 +6,7 @@ use App\Controller;
 use App\Database as AppDatabase;
 
 require_once __DIR__ . '/../Utils/GetCurrentSemester.php';
-
+//TODO: fix the reload page error
 class ScheduleController extends Controller
 {
     private $db;
