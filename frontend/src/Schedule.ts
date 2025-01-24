@@ -30,6 +30,9 @@ class Schedule {
     this.number = null;
     this.startDate = null;
     this.endDate = null;
+    this.getClassroom = this.debounce(this.getClassroom.bind(this), 1000);
+    this.getSubject = this.debounce(this.getSubject.bind(this), 1000);
+    this.getTeacher = this.debounce(this.getTeacher.bind(this), 1000);
 
     // this.parseUrlParams();
     this.setupEventListeners();
@@ -45,6 +48,15 @@ class Schedule {
     //   }
     // });
   }
+  debounce(func: Function, delay: number) {
+    let timeoutId: number;
+    return async (): Promise<void> => {
+      clearTimeout(timeoutId); 
+      timeoutId = setTimeout(() => {
+        func.apply(this); 
+      }, delay);
+    };
+  }
 
   setupEventListeners() {
     document.getElementById("scheduleForm")?.addEventListener("submit", (e) => {
@@ -54,9 +66,9 @@ class Schedule {
     document.getElementById("dayViewButton")?.addEventListener("click", () => this.changeGrid("timeGridDay"));
     document.getElementById("weekViewButton")?.addEventListener("click", () => this.changeGrid("dayGridWeek"));
     document.getElementById("monthViewButton")?.addEventListener("click", () => this.changeGrid("dayGridMonth"));
-    document.getElementById("classroom")?.addEventListener("change", this.getClassroom.bind(this));
-    document.getElementById("subject")?.addEventListener("change", this.getSubject.bind(this));
-    document.getElementById("teacher")?.addEventListener("change", this.getTeacher.bind(this));
+    document.getElementById("classroom")?.addEventListener("input", this.getClassroom.bind(this));
+    document.getElementById("subject")?.addEventListener("input", this.getSubject.bind(this));
+    document.getElementById("teacher")?.addEventListener("input", this.getTeacher.bind(this));
   }
 
   parseUrlParams() {
@@ -103,7 +115,10 @@ class Schedule {
           ul.appendChild(li);
         });
 
-      if (resultsContainer) (resultsContainer as HTMLDivElement).appendChild(ul);
+      if (resultsContainer) {
+        (resultsContainer as HTMLDivElement).style.display = "block";
+        (resultsContainer as HTMLDivElement).appendChild(ul)
+      };
     } catch (error) {
       if (resultsContainer) (resultsContainer as HTMLDivElement).innerHTML = "<p style='color: red;'>Error loading teachers.</p>";
     }
@@ -146,7 +161,10 @@ class Schedule {
           ul.appendChild(li);
         });
 
-      (resultsContainer as HTMLDivElement).appendChild(ul);
+        if (resultsContainer) {
+          (resultsContainer as HTMLDivElement).style.display = "block";
+          (resultsContainer as HTMLDivElement).appendChild(ul)
+        };
     } catch (error) {
       (resultsContainer as HTMLDivElement).innerHTML =
         "<p style='color: red;'>Error loading subjects.</p>";
@@ -192,7 +210,10 @@ class Schedule {
           ul.appendChild(li);
         });
 
-      (resultsContainer as HTMLDivElement).appendChild(ul);
+        if (resultsContainer) {
+          (resultsContainer as HTMLDivElement).style.display = "block";
+          (resultsContainer as HTMLDivElement).appendChild(ul)
+        };
     } catch (error) {
       (resultsContainer as HTMLDivElement).innerHTML =
         "<p style='color: red;'>Error loading classrooms.</p>";

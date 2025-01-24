@@ -79,6 +79,7 @@ label {
   overflow-y: auto;
   padding: 8px;
   font-size: 14px;
+  display: none;
 }
 #classroom-results .classroom-list {
   list-style: none;
