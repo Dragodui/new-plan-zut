@@ -160,6 +160,7 @@ class Schedule {
   }
 
   selectTeacher(teacherName: string | null) {
+    (document.getElementById("teacher-results") as HTMLDivElement).style.display = "none";
     this.teacher = teacherName || null;
     const teacherInput = document.getElementById("teacher");
     if (teacherInput) (teacherInput as HTMLInputElement).value = teacherName || "";
@@ -211,6 +212,7 @@ class Schedule {
   }
 
   selectSubject(subjectName: string | null) {
+    (document.getElementById("subject-results") as HTMLDivElement).style.display = "none";
     this.subject = subjectName || null;
     const subjectInput = document.getElementById("subject");
     if (subjectInput) (subjectInput as HTMLInputElement).value = subjectName || "";
@@ -264,6 +266,7 @@ class Schedule {
   }
 
   selectClassroom(classroomName: string | null) {
+    (document.getElementById("classroom-results") as HTMLDivElement).style.display = "none";
     this.classroom = classroomName || null;
     const classroomInput = document.getElementById("classroom");
     if (classroomInput) (classroomInput as HTMLInputElement).value = classroomName || "";
