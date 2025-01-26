@@ -1,6 +1,6 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
-  window.history.replaceState({}, '', window.location.pathname);
   const schedule = new Schedule();
+  schedule.parseUrlParams();
   await schedule.initializeCalendar(); 
 });

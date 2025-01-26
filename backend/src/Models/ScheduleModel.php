@@ -40,25 +40,49 @@ class ScheduleModel
         return $studentQuery->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getScheduleByGroups($groups, $startDate, $endDate)
+    public function getScheduleByGroups($groups, $startDate, $endDate, $teacher = null, $classroom = null, $subject = null)
     {
         $schedule = [];
-
+    
         foreach ($groups as $groupRow) {
             $group = $groupRow['groupNumber'];
-
-            $scheduleQuery = $this->db->prepare("
+    
+            $sql = "
                 SELECT * 
                 FROM schedule 
                 WHERE groupName = :group AND start >= :start AND end <= :end
-            ");
+            ";
+    
+            if ($teacher !== null) {
+                $sql .= " AND worker LIKE :teacher";
+            }
+            if ($classroom !== null) {
+                $sql .= " AND room LIKE :classroom";
+            }
+            if ($subject !== null) {
+                $sql .= " AND title LIKE :subject";
+            }
+    
+            $scheduleQuery = $this->db->prepare($sql);
+    
             $scheduleQuery->bindValue(':group', $group, PDO::PARAM_STR);
             $scheduleQuery->bindValue(':start', $startDate, PDO::PARAM_STR);
             $scheduleQuery->bindValue(':end', $endDate, PDO::PARAM_STR);
+    
+            if ($teacher !== null) {
+                $scheduleQuery->bindValue(':teacher', '%' . $teacher . '%', PDO::PARAM_STR);
+            }
+            if ($classroom !== null) {
+                $scheduleQuery->bindValue(':classroom', '%' . $classroom . '%', PDO::PARAM_STR);
+            }
+            if ($subject !== null) {
+                $scheduleQuery->bindValue(':subject', '%' . $subject . '%', PDO::PARAM_STR);
+            }
+    
             $scheduleQuery->execute();
-
+    
             $groupSchedule = $scheduleQuery->fetchAll(PDO::FETCH_ASSOC);
-
+    
             if (!empty($groupSchedule)) {
                 $schedule = array_merge($schedule, $groupSchedule);
             }

@@ -61,14 +61,49 @@ class Schedule {
   setupEventListeners() {
     document.getElementById("scheduleForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
-      this.getSchedule();
+      if(this.hasValidParams() !== null) {
+        this.getSchedule();
+      }
     });
     document.getElementById("dayViewButton")?.addEventListener("click", () => this.changeGrid("timeGridDay"));
     document.getElementById("weekViewButton")?.addEventListener("click", () => this.changeGrid("dayGridWeek"));
     document.getElementById("monthViewButton")?.addEventListener("click", () => this.changeGrid("dayGridMonth"));
-    document.getElementById("classroom")?.addEventListener("input", this.getClassroom.bind(this));
-    document.getElementById("subject")?.addEventListener("input", this.getSubject.bind(this));
-    document.getElementById("teacher")?.addEventListener("input", this.getTeacher.bind(this));
+
+    const classroomInput = document.getElementById("classroom");
+    if (classroomInput) {
+      classroomInput.addEventListener("input", (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        if (!value) this.selectClassroom(null);
+        else this.getClassroom();
+      });
+    }
+
+    const subjectInput = document.getElementById("subject");
+    if (subjectInput) {
+      subjectInput.addEventListener("input", (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        if (!value) this.selectSubject(null);
+        else this.getSubject();
+      });
+    }
+
+    const teacherInput = document.getElementById("teacher");
+    if (teacherInput) {
+      teacherInput.addEventListener("input", (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        if (!value) this.selectTeacher(null);
+        else this.getTeacher();
+      });
+    }
+
+    const studentNumberInput = document.getElementById("studentNumber");
+    if (studentNumberInput) {
+      studentNumberInput.addEventListener("input", (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        this.number = value || null;
+        this.updateQueryParams();
+      });
+    }
   }
 
   parseUrlParams() {
@@ -124,10 +159,14 @@ class Schedule {
     }
   }
 
-  selectTeacher(teacherName: string) {
-    this.teacher = teacherName;
-    (document.getElementById("teacher") as HTMLInputElement).value = teacherName;
-    (document.getElementById("teacher-results") as HTMLDivElement).innerHTML = "";
+  selectTeacher(teacherName: string | null) {
+    this.teacher = teacherName || null;
+    const teacherInput = document.getElementById("teacher");
+    if (teacherInput) (teacherInput as HTMLInputElement).value = teacherName || "";
+
+    const resultsContainer = document.getElementById("teacher-results");
+    if (resultsContainer) resultsContainer.innerHTML = "";
+
     this.updateQueryParams();
   }
 
@@ -171,10 +210,14 @@ class Schedule {
     }
   }
 
-  selectSubject(subjectName: string) {
-    this.subject = subjectName;
-    (document.getElementById("subject") as HTMLInputElement).value = subjectName;
-    (document.getElementById("subject-results") as HTMLDivElement).innerHTML = "";
+  selectSubject(subjectName: string | null) {
+    this.subject = subjectName || null;
+    const subjectInput = document.getElementById("subject");
+    if (subjectInput) (subjectInput as HTMLInputElement).value = subjectName || "";
+
+    const resultsContainer = document.getElementById("subject-results");
+    if (resultsContainer) resultsContainer.innerHTML = "";
+
     this.updateQueryParams();
   }
 
@@ -220,10 +263,14 @@ class Schedule {
     }
   }
 
-  selectClassroom(classroomName: string) {
-    this.classroom = classroomName;
-    (document.getElementById("classroom") as HTMLInputElement).value = classroomName;
-    (document.getElementById("classroom-results") as HTMLDivElement).innerHTML = "";
+  selectClassroom(classroomName: string | null) {
+    this.classroom = classroomName || null;
+    const classroomInput = document.getElementById("classroom");
+    if (classroomInput) (classroomInput as HTMLInputElement).value = classroomName || "";
+
+    const resultsContainer = document.getElementById("classroom-results");
+    if (resultsContainer) resultsContainer.innerHTML = "";
+
     this.updateQueryParams();
   }
 
@@ -238,13 +285,43 @@ class Schedule {
   }
 
   updateQueryParams() {
-    const queryParams = new URLSearchParams();
-    if (this.number) queryParams.set("number", this.number);
-    if (this.classroom) queryParams.set("room", this.classroom);
-    if (this.subject) queryParams.set("subject", this.subject);
-    if (this.teacher) queryParams.set("teacher", this.teacher);
-    if (this.startDate) queryParams.set("start", this.startDate.toISOString());
-    if (this.endDate) queryParams.set("end", this.endDate.toISOString());
+    const queryParams = new URLSearchParams(window.location.search);
+
+    if (this.number) {
+      queryParams.set("number", this.number);
+    } else {
+      queryParams.delete("number");
+    }
+
+    if (this.classroom) {
+      queryParams.set("room", this.classroom);
+    } else {
+      queryParams.delete("room");
+    }
+
+    if (this.subject) {
+      queryParams.set("subject", this.subject);
+    } else {
+      queryParams.delete("subject");
+    }
+
+    if (this.teacher) {
+      queryParams.set("teacher", this.teacher);
+    } else {
+      queryParams.delete("teacher");
+    }
+
+    if (this.startDate) {
+      queryParams.set("start", this.startDate.toISOString());
+    } else {
+      queryParams.delete("start");
+    }
+
+    if (this.endDate) {
+      queryParams.set("end", this.endDate.toISOString());
+    } else {
+      queryParams.delete("end");
+    }
 
     const newUrl = `${window.location.pathname}?${queryParams.toString()}`;
     history.pushState({}, "", newUrl);
