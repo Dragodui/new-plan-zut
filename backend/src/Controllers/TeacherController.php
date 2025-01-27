@@ -24,7 +24,7 @@ class TeacherController extends Controller
         }
 
         try {
-            $teachers = $this->model->getTeachers($teacher);
+            $teachers = TeacherModel::findBy(AppDatabase::getConnection(), ['item' => $teacher]);
             $this->jsonResponse($teachers);
         } catch (\Exception $e) {
             $this->jsonResponse(['error' => 'Unable to fetch teacher schedule', 'details' => $e->getMessage()], 500);
