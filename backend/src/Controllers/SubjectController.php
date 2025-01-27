@@ -24,7 +24,7 @@ class SubjectController extends Controller
         }
 
         try {
-            $subjects = $this->model->getSubjects($subject);
+            $subjects = SubjectModel::findBy(AppDatabase::getConnection(), ['item' => $subject]);
             $this->jsonResponse($subjects);
         } catch (\Exception $e) {
             $this->jsonResponse(['error' => 'Unable to fetch subject schedule', 'details' => $e->getMessage()], 500);
