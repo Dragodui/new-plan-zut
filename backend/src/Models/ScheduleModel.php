@@ -2,136 +2,204 @@
 namespace App\Models;
 
 use PDO;
+use PDOException;
 
 class ScheduleModel
 {
     private $db;
+    private $id;
+    private $groupName;
+    private $worker;
+    private $room;
+    private $title;
+    private $start;
+    private $end;
 
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
-    public function insertGroupsAndStudents($number, $groups)
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getGroupName(): ?string
+    {
+        return $this->groupName;
+    }
+
+    public function setGroupName(string $groupName): void
+    {
+        $this->groupName = $groupName;
+    }
+
+    public function getWorker(): ?string
+    {
+        return $this->worker;
+    }
+
+    public function setWorker(string $worker): void
+    {
+        $this->worker = $worker;
+    }
+
+    public function getRoom(): ?string
+    {
+        return $this->room;
+    }
+
+    public function setRoom(string $room): void
+    {
+        $this->room = $room;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public function getStart(): ?string
+    {
+        return $this->start;
+    }
+
+    public function setStart(string $start): void
+    {
+        $this->start = $start;
+    }
+
+    public function getEnd(): ?string
+    {
+        return $this->end;
+    }
+
+    public function setEnd(string $end): void
+    {
+        $this->end = $end;
+    }
+
+    public function save(): bool
     {
         try {
-            $groupQuery = $this->db->prepare("INSERT OR IGNORE INTO groups (item) VALUES (:group)");
-            $studentQuery = $this->db->prepare("INSERT OR IGNORE INTO students (item, groupNumber) VALUES (:number, :group)");
-
-            foreach ($groups as $group) {
-                $groupQuery->bindValue(':group', $group, PDO::PARAM_STR);
-                $groupQuery->execute();
-
-                $studentQuery->bindValue(':number', $number, PDO::PARAM_STR);
-                $studentQuery->bindValue(':group', $group, PDO::PARAM_STR);
-                $studentQuery->execute();
+            if ($this->id) {
+                $query = $this->db->prepare("
+                    UPDATE schedule 
+                    SET groupName = :groupName, worker = :worker, room = :room, title = :title, start = :start, end = :end 
+                    WHERE id = :id
+                ");
+                $query->bindValue(':id', $this->id, PDO::PARAM_INT);
+            } else {
+                $query = $this->db->prepare("
+                    INSERT INTO schedule (groupName, worker, room, title, start, end) 
+                    VALUES (:groupName, :worker, :room, :title, :start, :end)
+                ");
             }
+
+            $query->bindValue(':groupName', $this->groupName, PDO::PARAM_STR);
+            $query->bindValue(':worker', $this->worker, PDO::PARAM_STR);
+            $query->bindValue(':room', $this->room, PDO::PARAM_STR);
+            $query->bindValue(':title', $this->title, PDO::PARAM_STR);
+            $query->bindValue(':start', $this->start, PDO::PARAM_STR);
+            $query->bindValue(':end', $this->end, PDO::PARAM_STR);
+            $query->execute();
+
+            if (!$this->id) {
+                $this->id = $this->db->lastInsertId(); 
+            }
+
             return true;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             throw new \Exception('Database operation failed: ' . $e->getMessage());
         }
     }
 
-    public function getGroupsByStudentNumber($number)
+    public static function find(PDO $db, int $id): ?self
     {
-        $studentQuery = $this->db->prepare("SELECT groupNumber FROM students WHERE item = :number");
-        $studentQuery->bindValue(':number', $number, PDO::PARAM_STR);
-        $studentQuery->execute();
-        return $studentQuery->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $query = $db->prepare("SELECT * FROM schedule WHERE id = :id");
+            $query->bindValue(':id', $id, PDO::PARAM_INT);
+            $query->execute();
+
+            $data = $query->fetch(PDO::FETCH_ASSOC);
+
+            if (!$data) {
+                return null;
+            }
+
+            $schedule = new self($db);
+            $schedule->id = $data['id'];
+            $schedule->groupName = $data['groupName'];
+            $schedule->worker = $data['worker'];
+            $schedule->room = $data['room'];
+            $schedule->title = $data['title'];
+            $schedule->start = $data['start'];
+            $schedule->end = $data['end'];
+
+            return $schedule;
+        } catch (PDOException $e) {
+            throw new \Exception('Database operation failed: ' . $e->getMessage());
+        }
     }
 
-    public function getScheduleByGroups($groups, $startDate, $endDate, $teacher = null, $classroom = null, $subject = null)
+    public static function findBy(PDO $db, array $criteria): array
     {
-        $schedule = [];
+        try {
+            $sql = "SELECT * FROM schedule WHERE 1=1";
+            $params = [];
     
-        foreach ($groups as $groupRow) {
-            $group = $groupRow['groupNumber'];
-    
-            $sql = "
-                SELECT * 
-                FROM schedule 
-                WHERE groupName = :group AND start >= :start AND end <= :end
-            ";
-    
-            if ($teacher !== null) {
-                $sql .= " AND worker LIKE :teacher";
-            }
-            if ($classroom !== null) {
-                $sql .= " AND room LIKE :classroom";
-            }
-            if ($subject !== null) {
-                $sql .= " AND title LIKE :subject";
+            if (isset($criteria['groupName'])) {
+                $sql .= " AND groupName = :groupName";
+                $params[':groupName'] = $criteria['groupName'];
             }
     
-            $scheduleQuery = $this->db->prepare($sql);
-    
-            $scheduleQuery->bindValue(':group', $group, PDO::PARAM_STR);
-            $scheduleQuery->bindValue(':start', $startDate, PDO::PARAM_STR);
-            $scheduleQuery->bindValue(':end', $endDate, PDO::PARAM_STR);
-    
-            if ($teacher !== null) {
-                $scheduleQuery->bindValue(':teacher', '%' . $teacher . '%', PDO::PARAM_STR);
-            }
-            if ($classroom !== null) {
-                $scheduleQuery->bindValue(':classroom', '%' . $classroom . '%', PDO::PARAM_STR);
-            }
-            if ($subject !== null) {
-                $scheduleQuery->bindValue(':subject', '%' . $subject . '%', PDO::PARAM_STR);
+            if (isset($criteria['worker'])) {
+                $sql .= " AND worker LIKE :worker";
+                $params[':worker'] = '%' . $criteria['worker'] . '%';
             }
     
-            $scheduleQuery->execute();
-    
-            $groupSchedule = $scheduleQuery->fetchAll(PDO::FETCH_ASSOC);
-    
-            if (!empty($groupSchedule)) {
-                $schedule = array_merge($schedule, $groupSchedule);
+            if (isset($criteria['room'])) {
+                $sql .= " AND room LIKE :room";
+                $params[':room'] = '%' . $criteria['room'] . '%';
             }
+    
+            if (isset($criteria['title'])) {
+                $sql .= " AND title LIKE :title";
+                $params[':title'] = '%' . $criteria['title'] . '%';
+            }
+    
+            if (isset($criteria['building'])) {
+                $sql .= " AND room LIKE :building";
+                $params[':building'] = '%' . $criteria['building'] . '%';
+            }
+    
+            if (isset($criteria['start'])) {
+                $sql .= " AND start >= :start";
+                $params[':start'] = $criteria['start'];
+            }
+    
+            if (isset($criteria['end'])) {
+                $sql .= " AND end <= :end";
+                $params[':end'] = $criteria['end'];
+            }
+    
+            $query = $db->prepare($sql);
+    
+            foreach ($params as $key => $value) {
+                $query->bindValue($key, $value, PDO::PARAM_STR);
+            }
+    
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new \Exception('Database operation failed: ' . $e->getMessage());
         }
-        return $schedule;
     }
-
-    public function getScheduleByFilters($filters)
-    {
-        $queryParts = [];
-        $params = [];
-
-        if (isset($filters['teacher'])) {
-            $queryParts[] = "worker LIKE :teacher";
-            $params[':teacher'] = '%' . $filters['teacher'] . '%';
-        }
-
-        if (isset($filters['subject'])) {
-            $queryParts[] = "title LIKE :subject";
-            $params[':subject'] = '%' . $filters['subject'] . '%';
-        }
-
-        if (isset($filters['classroom'])) {
-            $queryParts[] = "room LIKE :classroom";
-            $params[':classroom'] = '%' . $filters['classroom'] . '%';
-        }
-
-        if (isset($filters['start'])) {
-            $queryParts[] = "start >= :start";
-            $params[':start'] = $filters['start'];
-        }
-
-        if (isset($filters['end'])) {
-            $queryParts[] = "end <= :end";
-            $params[':end'] = $filters['end'];
-        }
-
-        $sql = "SELECT * FROM schedule";
-        if (!empty($queryParts)) {
-            $sql .= " WHERE " . implode(" AND ", $queryParts);
-        }
-
-        $query = $this->db->prepare($sql);
-
-        foreach ($params as $key => $value) {
-            $query->bindValue($key, $value, PDO::PARAM_STR);
-        }
-
-        $query->execute();
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
+    
 }

@@ -18,14 +18,10 @@ class Router
         header('Access-Control-Allow-Origin: *'); 
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type, Authorization');
-        // echo json_encode($this->routes);
-        // exit;
 
         foreach ($this->routes[$method] as $path => $handler) {
             if ($path === $uri) {
                 [$class, $method] = $handler;
-                // $instance = new $class();
-                // echo get_class($instance);
                 if (class_exists($class) && method_exists($class, $method)) {
                     (new $class())->$method();
                 } else {

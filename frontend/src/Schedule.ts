@@ -4,13 +4,13 @@ class Schedule {
   events: Event[];
   calendar: typeof FullCalendar.Calendar | null;
   classroom: string | null;
-  classrooms: string[];
   kind: string | null;
   subject: string | null;
   teacher: string | null;
   number: string | null;
   startDate: Date | null;
   endDate: Date | null;
+  building: string | null;
   shouldFetchSchedule: boolean;
 
   constructor() {
@@ -23,7 +23,7 @@ class Schedule {
     this.getSchedule = this.getSchedule.bind(this);
     this.calendar = null;
     this.classroom = null;
-    this.classrooms = [];
+    this.building = null;
     this.kind = null;
     this.subject = null;
     this.teacher = null;
@@ -34,19 +34,11 @@ class Schedule {
     this.getSubject = this.debounce(this.getSubject.bind(this), 1000);
     this.getTeacher = this.debounce(this.getTeacher.bind(this), 1000);
 
-    // this.parseUrlParams();
     this.setupEventListeners();
 
     if (this.hasValidParams() !== null) {
       this.getSchedule();
     }
-
-    // window.addEventListener("popstate", (event) => {
-    //   this.parseUrlParams();
-    //   if (this.hasValidParams()) {
-    //     this.getSchedule();
-    //   }
-    // });
   }
   debounce(func: Function, delay: number) {
     let timeoutId: number;
@@ -68,6 +60,15 @@ class Schedule {
     document.getElementById("dayViewButton")?.addEventListener("click", () => this.changeGrid("timeGridDay"));
     document.getElementById("weekViewButton")?.addEventListener("click", () => this.changeGrid("dayGridWeek"));
     document.getElementById("monthViewButton")?.addEventListener("click", () => this.changeGrid("dayGridMonth"));
+
+    const buildingInput = document.getElementById("building");
+    if (buildingInput) {
+      buildingInput.addEventListener("input", (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        if (!value) this.selectBuilding(null);
+        else this.getBuilding();
+      });
+    }
 
     const classroomInput = document.getElementById("classroom");
     if (classroomInput) {
@@ -112,6 +113,7 @@ class Schedule {
     this.classroom = params.get("room") || null;
     this.subject = params.get("subject") || null;
     this.teacher = params.get("teacher") || null;
+    this.building = params.get("building") || null;
 
     if (this.number)
       (document.getElementById("studentNumber") as HTMLInputElement).value = this.number;
@@ -119,6 +121,7 @@ class Schedule {
       (document.getElementById("classroom")as HTMLInputElement).value = this.classroom;
     if (this.subject) (document.getElementById("subject") as HTMLInputElement).value = this.subject;
     if (this.teacher) (document.getElementById("teacher") as HTMLInputElement).value = this.teacher;
+    if (this.building) (document.getElementById("building") as HTMLInputElement).value = this.building;
   }
 
   async getTeacher() {
@@ -223,6 +226,59 @@ class Schedule {
     this.updateQueryParams();
   }
 
+  async getBuilding() {
+    const buildingQuery = (document.getElementById("building")as HTMLInputElement).value;
+    const resultsContainer = document.getElementById("building-results");
+    (resultsContainer as HTMLDivElement).innerHTML = "";
+
+    if (!buildingQuery) {
+      return;
+    }
+
+    try {
+      const response = await this.api.get(`/building?building=${buildingQuery}`);
+      const data = response.data;
+
+      if (!Array.isArray(data) || data.length === 0) {
+        (resultsContainer as HTMLDivElement).innerHTML = "<p>No buildings found.</p>";
+        return;
+      }
+
+      const ul = document.createElement("ul");
+      ul.classList.add("building-list");
+
+      data
+        .filter((item) => item && typeof item === "object" && item.item)
+        .forEach((building) => {
+          const li = document.createElement("li");
+          li.textContent = building.item;
+          li.addEventListener("click", () => this.selectBuilding(building.item));
+          ul.appendChild(li);
+        });
+
+        if (resultsContainer) {
+          (resultsContainer as HTMLDivElement).style.display = "block";
+          (resultsContainer as HTMLDivElement).appendChild(ul)
+        };
+    } catch (error) {
+      (resultsContainer as HTMLDivElement).innerHTML =
+        "<p style='color: red;'>Error loading buildings.</p>";
+    }
+  }
+
+  selectBuilding(buildingName: string | null) {
+    (document.getElementById("building-results") as HTMLDivElement).style.display = "none";
+    this.building = buildingName || null;
+    const buildingInput = document.getElementById("building");
+    if (buildingInput) (buildingInput as HTMLInputElement).value = buildingName || "";
+
+    const resultsContainer = document.getElementById("building-results");
+    if (resultsContainer) resultsContainer.innerHTML = "";
+
+    this.updateQueryParams();
+  }
+
+
   async getClassroom() {
     const classroomQuery = (document.getElementById("classroom") as HTMLInputElement).value;
     const resultsContainer = document.getElementById("classroom-results");
@@ -233,7 +289,7 @@ class Schedule {
     }
 
     try {
-      const response = await this.api.get(`/classroom?room=${classroomQuery}`);
+      const response = await this.api.get(`/classroom?room=${classroomQuery}${this.building ? `&building=${this.building}`: ""}`);
       const data = response.data;
 
       if (!Array.isArray(data) || data.length === 0) {
@@ -296,6 +352,12 @@ class Schedule {
       queryParams.delete("number");
     }
 
+    if (this.building) {
+      queryParams.set("building", this.building);
+    } else {
+      queryParams.delete("building");
+    }
+
     if (this.classroom) {
       queryParams.set("room", this.classroom);
     } else {
@@ -315,13 +377,15 @@ class Schedule {
     }
 
     if (this.startDate) {
-      queryParams.set("start", this.startDate.toISOString());
+      const formattedStartDate = this.startDate.toISOString().split('T')[0];
+      queryParams.set("start", formattedStartDate);
     } else {
       queryParams.delete("start");
     }
 
     if (this.endDate) {
-      queryParams.set("end", this.endDate.toISOString());
+      const formattedEndDate = this.endDate.toISOString().split('T')[0];
+      queryParams.set("end", formattedEndDate);
     } else {
       queryParams.delete("end");
     }
@@ -348,7 +412,6 @@ class Schedule {
       );
 
       if (response.status !== 200) {
-        // throw new Error("Failed to fetch schedule");
         console.error("Failed to fetch schedule");
       }
 
@@ -497,7 +560,7 @@ class Schedule {
   }
 
   hasValidParams(): string | null {
-    const result =  this.number || this.classroom || this.subject || this.teacher;
+    const result =  this.number || this.classroom || this.subject || this.teacher || this.building;
     return result;
   }
 }

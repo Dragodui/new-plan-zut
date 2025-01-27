@@ -7,8 +7,8 @@ function getSemesterDates($currentDate = null) {
     $year = (int)date('Y', strtotime($currentDate));
 
     $firstSemesterStart = ($year - 1) . "-10-01T23%3A00%3A00.000Z";
-    $firstSemesterEnd =  "$year-02-25T23%3A00%3A00.000Z";
-    $secondSemesterStart = "$year-03-01T23%3A00%3A00.000Z";
+    $firstSemesterEnd =  "$year-02-09T23%3A00%3A00.000Z";
+    $secondSemesterStart = "$year-02-10T23%3A00%3A00.000Z";
     $secondSemesterEnd = "$year-09-30T23%3A00%3A00.000Z";
 
     if ($currentDate >= $firstSemesterStart && $currentDate <= $firstSemesterEnd) {

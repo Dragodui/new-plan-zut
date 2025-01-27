@@ -97,6 +97,22 @@ label {
 #classroom-results .classroom-list li:hover {
   background-color: #e6f7ff;
 }
+#building-results .building-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#building-results .building-list li {
+  padding: 4px 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+#building-results .building-list li:last-child {
+  border-bottom: none;
+}
+#building-results .building-list li:hover {
+  background-color: #e6f7ff;
+}
 #subject-results .subject-list {
   list-style: none;
   padding: 0;
