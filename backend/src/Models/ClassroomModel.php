@@ -101,8 +101,8 @@ class ClassroomModel
             }
 
             if (isset($criteria['building'])) {
-                $sql .= " AND building LIKE :building";
-                $params[':building'] = '%' . $criteria['building'] . '%';
+                $sql .= " AND building = :building";
+                $params[':building'] = $criteria['building'];
             }
 
             $query = $db->prepare($sql);

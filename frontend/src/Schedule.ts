@@ -560,7 +560,7 @@ class Schedule {
   }
 
   hasValidParams(): string | null {
-    const result =  this.number || this.classroom || this.subject || this.teacher || this.building;
+    const result =  this.number || this.classroom || this.subject || this.teacher;
     return result;
   }
 }
