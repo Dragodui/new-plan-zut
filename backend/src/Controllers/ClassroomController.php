@@ -11,19 +11,6 @@ class ClassroomController extends Controller
 
     public function __construct()
     {
-        $this<?php
-namespace App\Controllers;
-
-use App\Controller;
-use App\Models\ClassroomModel;
-use App\Database as AppDatabase;
-
-class ClassroomController extends Controller
-{
-    private $model;
-
-    public function __construct()
-    {
         $this->model = new ClassroomModel(AppDatabase::getConnection());
     }
 
@@ -44,26 +31,6 @@ class ClassroomController extends Controller
             }
 
             $classrooms = ClassroomModel::findBy(AppDatabase::getConnection(), $criteria);
-            $this->jsonResponse($classrooms);
-        } catch (\Exception $e) {
-            $this->jsonResponse(['error' => 'Unable to fetch classroom schedule', 'details' => $e->getMessage()], 500);
-        }
-    }
-}->model = new ClassroomModel(AppDatabase::getConnection());
-    }
-
-    public function getClassroom()
-    {
-        $room = $_GET['room'] ?? null;
-        $building = $_GET['building'] ?? null;
-
-        if (!$room) {
-            $this->jsonResponse(['error' => 'Room is required'], 400);
-            return;
-        }
-
-        try {
-            $classrooms = $this->model->getClassrooms($room, $building);
             $this->jsonResponse($classrooms);
         } catch (\Exception $e) {
             $this->jsonResponse(['error' => 'Unable to fetch classroom schedule', 'details' => $e->getMessage()], 500);
