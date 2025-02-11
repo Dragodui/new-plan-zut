@@ -95,30 +95,45 @@ tsc
 
 ```
 new-plan-zut/
-├── backend/                     # Backend-related logic and PHP files
-│   ├── public/                  # Public-facing entry point
-│   │   └── index.php            # Main entry point for the backend
-│   ├── src/                     # Core backend source code
-│   │   ├── Controllers/         # Controller classes handling various logic
-│   │   │   ├── ClassroomController.php
-│   │   │   ├── ScheduleController.php
-│   │   │   ├── SubjectController.php
-│   │   │   └── TeacherController.php
-│   │   ├── Controller.php       # Base controller class
-│   │   ├── Router.php           # Routing logic for backend requests
-│   ├── composer.json            # PHP dependencies
-│   └── composer.lock            # Locked PHP dependencies
-├── frontend/                    # Frontend files including HTML, CSS, and TypeScript
-│   ├── css/                     # Styling for the frontend
-│   │   └── styles.css           # Main CSS file
-│   ├── src/                     # Core frontend source code
-│   │   ├── types/               # TypeScript types and interfaces
-│   │   ├── main.ts              # Main TypeScript logic
-│   │   ├── Schedule.ts          # TypeScript logic for scheduling
-│   │   └── index.html           # Main HTML file for the frontend
-│   └── tsconfig.json            # TypeScript configuration file
-├── .gitignore                   # Files and folders to ignore in Git
-└── README.md                    # Project documentation
+    ├── README.md
+    ├── backend/
+    │   ├── composer.json
+    │   ├── composer.lock
+    │   ├── public/
+    │   │   └── index.php
+    │   └── src/
+    │       ├── Controller.php
+    │       ├── Router.php
+    │       ├── Controllers/
+    │       │   ├── BuildingController.php
+    │       │   ├── ClassroomController.php
+    │       │   ├── ScheduleController.php
+    │       │   ├── SubjectController.php
+    │       │   └── TeacherController.php
+    │       ├── Database/
+    │       │   ├── Database.php
+    │       │   └── initializeDB.php
+    │       ├── Models/
+    │       │   ├── BuildingModel.php
+    │       │   ├── ClassroomModel.php
+    │       │   ├── GroupModel.php
+    │       │   ├── ScheduleModel.php
+    │       │   ├── StudentModel.php
+    │       │   ├── SubjectModel.php
+    │       │   └── TeacherModel.php
+    │       └── Utils/
+    │           └── GetCurrentSemester.php
+    └── frontend/
+        ├── index.html
+        ├── tsconfig.json
+        ├── css/
+        │   └── styles.css
+        └── src/
+            ├── Schedule.ts
+            ├── main.ts
+            └── types/
+                └── global.d.ts
+
 ```
 
 
